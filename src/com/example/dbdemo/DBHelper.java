@@ -29,28 +29,29 @@ public class DBHelper extends SQLiteOpenHelper{
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		
 	}
 	
-	private void isDirectoryPresent() {
-		// create directory if not in existence
-		File file = new File("/data/data/" +mContext.getPackageName()+ "/databases");
+	private void isDirectoryPresent(String db_path) {
+		// create "databases" directory if not in existence in data/data/package_name/databases/
+		File file = new File(db_path.substring(0, db_path.indexOf(DB_NAME)));
 		
+		// check if databases folder exists or not.
 		if(!file.isDirectory())
 			file.mkdir();
 	}
 	
 	public void createDatabaseFile(){
 		
-		isDirectoryPresent(); 
-		File file = new File(mContext.getDatabasePath(DB_NAME).getAbsolutePath());
-		Log.d(getClass().getSimpleName(), file.getAbsolutePath());
+		// data/data/package_name/databases/db_name.db
+		String db_path = mContext.getDatabasePath(DBHelper.DB_NAME).toString();
+		isDirectoryPresent(db_path); 
 		
+		File file = new File(db_path);
+		Log.d(getClass().getSimpleName(), file.getAbsolutePath());
 		if(file.exists()){
 			Log.d(getClass().getSimpleName(), "File already exists");
 		}

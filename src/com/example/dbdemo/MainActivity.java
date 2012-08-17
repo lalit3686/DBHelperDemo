@@ -81,15 +81,11 @@ public class MainActivity extends Activity{
      *Bulk Insertion of data in Table
      * 
      **/
-	/*private void UsingTransaction() {
+	void UsingTransaction() {
 		try {
 			db.beginTransaction();
-			SQLiteStatement insert = db.compileStatement("insert into "+DBHelper.TBL_LOGIN+" values(?,?)");
 			for (int i = 0; i < 8000; i++) {
-				insert.bindString(1, "username "+i);
-				insert.bindString(2, "password "+i);
-				insert.executeInsert();
-				//dbHelper.insertIntoLogin(db, "new_username", "new_password");
+				dbHelper.insertIntoLogin(db, "new_username", "new_password");
 			}
 			db.setTransactionSuccessful();
 		} 
@@ -98,7 +94,7 @@ public class MainActivity extends Activity{
 		finally{
 			db.endTransaction();
 		}
-	}*/
+	}
     
     /**
      *
