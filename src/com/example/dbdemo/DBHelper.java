@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -75,5 +76,25 @@ public class DBHelper extends SQLiteOpenHelper{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void insertIntoLogin(SQLiteDatabase db, String username, String password) {
+		db.execSQL("insert into "+TBL_LOGIN+" ("+TBL_COL_UNAME+","+TBL_COL_PASSWORD+")values('"+username+"','"+password+"')");
+	}
+	
+	public void updateUsingUserName(SQLiteDatabase db, String username, String password) {
+		db.execSQL("update "+TBL_LOGIN+" set "+TBL_COL_PASSWORD+"='"+password+"' where "+TBL_COL_UNAME+"=?", new String[]{username});
+	}
+	
+	public void deleteByUserName(SQLiteDatabase db, String username) {
+		db.execSQL("delete from "+TBL_LOGIN+" where "+TBL_COL_UNAME+"=?", new String[]{username});
+	}
+	
+	public Cursor readAllLogin(SQLiteDatabase db) {
+		return db.rawQuery("select * from "+TBL_LOGIN, null);
+	}
+	
+	public Cursor readFromUserName(SQLiteDatabase db, String username) {
+		return db.rawQuery("select * from "+TBL_LOGIN+" where "+TBL_COL_UNAME+"=?", new String[]{username});
 	}
 }

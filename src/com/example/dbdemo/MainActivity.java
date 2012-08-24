@@ -3,9 +3,9 @@ package com.example.dbdemo;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,13 +17,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class MainActivity extends Activity implements TaskListener{
+public class MainActivity extends Activity{
 
 	private DBHelper dbHelper;
 	private ListView listView;
 	private EditText et_username, et_password;
 	private ArrayList<POJO> list = new ArrayList<POJO>();
 	private MyAdapter adapter;
+	SQLiteDatabase db;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,47 +40,50 @@ public class MainActivity extends Activity implements TaskListener{
         listView.setAdapter(adapter);
     }
     
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	
+    	db = SQLiteDatabase.openDatabase(getDatabasePath(DBHelper.DB_NAME).getAbsolutePath(), null, SQLiteDatabase.OPEN_READWRITE);;
+    }
+    
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	db.close();
+    	
+    }
+    
     private void initComponents() {
     	listView = (ListView) findViewById(R.id.listView);
         et_username = (EditText) findViewById(R.id.et_username);
         et_password = (EditText) findViewById(R.id.et_password);
 	}
     
-    public void onTaskCompleted(QueryType queryType, Cursor cursor) {
-		Log.e("query_type", queryType.name()+" "+queryType.value);
-		readData(cursor);
-	}
-    
     public void MyOnClick(View view) {
     	int id = view.getId();
-    	ContentValues values = new ContentValues();
-    	SqliteTask mSqliteTask = null;
     	switch (id) {
 		case R.id.btn_insert:
 			if(!TextUtils.isEmpty(et_username.getText().toString().trim()) && !TextUtils.isEmpty(et_password.getText().toString().trim())){
-				values.put(DBHelper.TBL_COL_UNAME, et_username.getText().toString());
-				values.put(DBHelper.TBL_COL_PASSWORD, et_password.getText().toString());
-				mSqliteTask = new SqliteTask((Activity)view.getContext(), DBHelper.TBL_LOGIN, values, null, null);
-				mSqliteTask.execute(QueryType.INSERT);
+				dbHelper.insertIntoLogin(db, et_username.getText().toString(), et_password.getText().toString());
+				readData(dbHelper.readAllLogin(db));
 			}
 			break;
 		case R.id.btn_update:
 			if(!TextUtils.isEmpty(et_username.getText().toString().trim()) && !TextUtils.isEmpty(et_password.getText().toString().trim())){
-				values.put(DBHelper.TBL_COL_PASSWORD, et_password.getText().toString());
-				mSqliteTask = new SqliteTask((Activity)view.getContext(), DBHelper.TBL_LOGIN, values, DBHelper.TBL_COL_UNAME+"=?", new String[]{et_username.getText().toString()});
-				mSqliteTask.execute(QueryType.UPDATE);				
+				dbHelper.updateUsingUserName(db, et_username.getText().toString(), et_password.getText().toString());
+				readData(dbHelper.readAllLogin(db));
 			}
 			break;
 		case R.id.btn_delete:
 			if(!TextUtils.isEmpty(et_username.getText().toString().trim())){
-				mSqliteTask = new SqliteTask((Activity)view.getContext(), DBHelper.TBL_LOGIN, null, DBHelper.TBL_COL_UNAME+"=?", new String[]{et_username.getText().toString()});
-				mSqliteTask.execute(QueryType.DELETE);	
+				dbHelper.deleteByUserName(db, et_username.getText().toString());
+				readData(dbHelper.readAllLogin(db));
 			}
 			break;
 		case R.id.btn_read:
 			if(!TextUtils.isEmpty(et_username.getText().toString().trim())){
-				mSqliteTask = new SqliteTask((Activity)view.getContext(), DBHelper.TBL_LOGIN, null, DBHelper.TBL_COL_UNAME+"=?", new String[]{et_username.getText().toString()});
-				mSqliteTask.execute(QueryType.SELECT);	
+				readData(dbHelper.readFromUserName(db, et_username.getText().toString().trim()));
 			}
 			break;
 		}
